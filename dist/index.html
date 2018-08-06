@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My App</title>
+
+
+    <script src="/assets/test.js">
+    </script>
+
+
+
+    <script src="/assets/test2.js">
+    </script>
+
+
+    <link rel="stylesheet" 
+            type="text/css" 
+            href="/assets/styles.css" />
+
+
+
+
+
+
+
+    <script type="custom"> 
+      if ('serviceWorker' in navigator) {
+          console.log("SW can be supported");
+          window.addEventListener("load", function(){
+              console.log("window loaded");
+              navigator.serviceWorker.register('sw.js')
+              .then (function (registration) {
+                 window.swRegistration = registration;
+                 console.log("update service, works if changed")
+                 //swRegistration.update();
+              })
+          })
+      }
+
+       function urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+      const applicationServerPublicKey = 'BMOtMw6GE9fBKk9W4NGwllpdrs63As5Rf_Ngq06PKBrnd7w0uue1kj8BOnz9HV1-EqYVHwcCKtwHHVcZTJbygwk';
+
+
+      function subscribeUser() {
+                const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+                swRegistration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey
+                })
+                .then(function(subscription) {
+                    console.log('User is subscribed.');
+
+                    updateSubscriptionOnServer(subscription);
+
+                    isSubscribed = true;
+
+                    updateBtn();
+                })
+                .catch(function(err) {
+                    console.log('Failed to subscribe the user: ', err);
+                    updateBtn();
+                });
+                }
+
+
+                function initialiseUI() {
+  pushButton.addEventListener('click', function() {
+    pushButton.disabled = true;
+    if (isSubscribed) {
+          console.log("user already subscribed");
+      // TODO: Unsubscribe user
+    } else {
+        console.log("subscribing user");
+      subscribeUser();
+    }
+  });
+
+  // Set the initial subscription value
+  swRegistration.pushManager.getSubscription()
+  .then(function(subscription) {
+    isSubscribed = !(subscription === null);
+
+    updateSubscriptionOnServer(subscription);
+
+    if (isSubscribed) {
+      console.log('User IS subscribed.');
+    } else {
+      console.log('User is NOT subscribed.');
+    }
+
+    updateBtn();
+  });
+}
+
+function updateBtn() {
+  if (isSubscribed) {
+    pushButton.textContent = 'Disable Push Messaging';
+  } else {
+    pushButton.textContent = 'Enable Push Messaging';
+  }
+
+  pushButton.disabled = false;
+}
+
+    function updateSubscriptionOnServer(subscription) {
+            // TODO: Send subscription to application server
+        
+
+            if (subscription) {
+                console.log("subscription ", JSON.stringify(subscription));
+                subscriptionEndPoint.textContent = JSON.stringify(subscription);
+                 
+            } else {
+               console.log("no susbcription");
+            }
+    }
+
+</script>
+
+</head>
+<body>
+    <h2>s</h2>
+<!-- 
+
+    <button id="initialize">
+        Initialize
+    </button>
+
+    <button id="push">
+        Push
+    </button>
+
+    <p id="subscriptionEndPoint">
+    </p> -->
+
+
+
+    <script type="custom" >
+        var button = document.getElementById("initialize");
+        button.addEventListener("click", function(){
+            alert("initialize");
+            initialiseUI();
+        })
+
+        window.pushButton = document.getElementById("push");
+        pushButton.addEventListener("click", function(){
+            //alert("update");
+            
+        })
+
+        window.subscriptionEndPoint = document.getElementById("subscriptionEndPoint");
+    </script>
+    
+    <div id="root">
+
+    </div>
+
+
+<script type="text/javascript" src="vendor.bundle.js"></script><script type="text/javascript" src="bundle.af8c379d7c194d502b9f.js"></script></body>
+</html>
